@@ -72,6 +72,7 @@ jobs:
         id: read-version
         run: echo "current_version=$(yq -r .version galaxy.yml)" >> $GITHUB_OUTPUT
         shell: bash
+        working-directory: ${{ env.collection_path }}
 
       - name: Compute next major release version
         id: compute-version
