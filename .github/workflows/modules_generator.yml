@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       python_version: '3.9'
-      ansible_version: '2.11'
+      ansible_version: 'stable-2.11'
       collection_path: "amazon_cloud"
     steps:
       - name: checkout repository
