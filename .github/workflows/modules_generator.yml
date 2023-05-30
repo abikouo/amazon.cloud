@@ -39,6 +39,12 @@ jobs:
         with:
           python-version: ${{ env.python_version }}
 
+      - name: Install required ansible collections
+        run: |
+          ansible-galaxy collection install git+https://github.com/ansible-community/ansible.content_builder.git
+          ansible-galaxy collection install ansible.utils
+        shell: bash
+
       - name: Install python modules
         run: >-
           python3 -m pip install
@@ -48,12 +54,6 @@ jobs:
           https://github.com/ansible/ansible/archive/${{ env.ansible_version }}.tar.gz
           -r /home/runner/.ansible/collections/ansible_collections/ansible/content_builder/requirements.txt
           --disable-pip-version-check
-        shell: bash
-
-      - name: Install required ansible collections
-        run: |
-          ansible-galaxy collection install git+https://github.com/ansible-community/ansible.content_builder.git
-          ansible-galaxy collection install ansible.utils
         shell: bash
 
       - name: Generate playbook to execute
