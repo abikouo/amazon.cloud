@@ -1,0 +1,91 @@
+---
+name: modules generator
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.sha }}'
+  cancel-in-progress: true
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  #     - 'stable-*'
+  # pull_request_target:
+  #   types:
+  #     - labeled
+  #     - unlabeled
+  #     - opened
+  #     - reopened
+  #     - synchronize
+  pull_request:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    env:
+      python_version: '3.9'
+      ansible_version: '2.11'
+      collection_path: "amazon_cloud"
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.head_ref }}
+          path: ${{ env.collection_path }}
+
+      - name: Set up Python ${{ env.python_version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.python_version }}
+
+      - name: Install python modules
+        run: >-
+          python3 -m pip install
+          boto3
+          botocore
+          black==22.3.0
+          jsonschema
+          jinja2==3.0.3
+          q
+          https://github.com/ansible/ansible/archive/${{ env.ansible_version }}.tar.gz --disable-pip-version-check
+        shell: bash
+
+      - name: Install required ansible collections
+        run: |
+          ansible-galaxy collection install git+https://github.com/ansible-community/ansible.content_builder.git
+          ansible-galaxy collection install ansible.utils
+        shell: bash
+
+      - name: Generate playbook to execute
+        run: |
+          echo "---" > build.yaml
+          echo "- hosts: localhost"  >> build.yaml
+          echo "  gather_facts: yes" >> build.yaml
+          echo "  roles:"            >> build.yaml
+          echo "  - ansible.content_builder.run" >> build.yaml
+        shell: bash
+
+      - name: Generate manifest file
+        run: |
+          echo "---" > manifest.yaml
+          echo "collection:" >> manifest.yaml
+          echo "  path: /home/aubin/.ansible/collections/ansible_collections/amazon/cloud/" >> manifest.yaml
+          echo "  namespace: amazon" >> manifest.yaml
+          echo "  name: cloud"       >> manifest.yaml
+          echo "plugins:" >> manifest.yaml
+          echo "- type: module_openapi" >> manifest.yaml
+          echo "  name: amazon_cloud"   >> manifest.yaml
+          echo "  content: cloud"       >> manifest.yaml
+          echo "  api_object_path: api_specifications" >> manifest.yaml
+          echo "  resource: /home/aubin/.ansible/collections/ansible_collections/amazon/cloud/config" >> manifest.yaml
+          echo "  action: generate_all" >> manifest.yaml
+          echo "  unique_key: ''"       >> manifest.yaml
+          echo "  rm_swagger_json: ''"  >> manifest.yaml
+          echo "  module_version: "     >> manifest.yaml
+          echo "  author: 'Ansible Cloud Team'" >> manifest.yaml
+
+      - name: Generate collection modules
+        run: >-
+          ansible-playbook build.yaml -e manifest_file=manifest.yaml -v
+        shell: bash
