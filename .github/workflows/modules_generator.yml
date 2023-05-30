@@ -42,15 +42,12 @@ jobs:
       - name: Install python modules
         run: >-
           python3 -m pip install
-          boto3
-          botocore
-          black==22.3.0
-          jsonschema
-          jinja2==3.0.3
           packaging
           q
           yq
-          https://github.com/ansible/ansible/archive/${{ env.ansible_version }}.tar.gz --disable-pip-version-check
+          https://github.com/ansible/ansible/archive/${{ env.ansible_version }}.tar.gz
+          -r /home/runner/.ansible/collections/ansible_collections/ansible/content_builder/requirements.txt
+          --disable-pip-version-check
         shell: bash
 
       - name: Install required ansible collections
