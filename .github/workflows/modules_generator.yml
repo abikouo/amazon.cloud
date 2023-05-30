@@ -47,7 +47,9 @@ jobs:
           black==22.3.0
           jsonschema
           jinja2==3.0.3
+          packaging
           q
+          yq
           https://github.com/ansible/ansible/archive/${{ env.ansible_version }}.tar.gz --disable-pip-version-check
         shell: bash
 
@@ -66,6 +68,12 @@ jobs:
           echo "  - ansible.content_builder.run" >> build.yaml
         shell: bash
 
+      - name: Compute next major release version
+        id: compute-version
+        run: 
+          python -c "from packaging import version; v=version.Version('$(yq -r .version galaxy.yml)'); print('next_version=%s.%s.%s' % (v.major, v.minor+1, v.micro))" >> $GITHUB_OUTPUT
+        shell: bash
+
       - name: Generate manifest file
         run: |
           echo "---" > manifest.yaml
@@ -82,7 +90,7 @@ jobs:
           echo "  action: generate_all" >> manifest.yaml
           echo "  unique_key: ''"       >> manifest.yaml
           echo "  rm_swagger_json: ''"  >> manifest.yaml
-          echo "  module_version: "     >> manifest.yaml
+          echo "  module_version: ${{ steps.compute-version.outputs.next_version }}"     >> manifest.yaml
           echo "  author: 'Ansible Cloud Team'" >> manifest.yaml
         shell: bash
 
