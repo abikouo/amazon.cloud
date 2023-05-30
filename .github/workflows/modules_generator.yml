@@ -74,4 +74,6 @@ jobs:
           -e collection_path="${{ github.workspace }}/${{ env.collection_path }}"
           -e collection_version="${{ steps.compute-version.outputs.next_version }}" -v
         shell: bash
+        env:
+          AWS_DEFAULT_REGION: "us-east-1"
         working-directory: ${{ env.collection_path }}
