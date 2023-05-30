@@ -85,6 +85,14 @@ jobs:
           echo "  module_version: "     >> manifest.yaml
           echo "  author: 'Ansible Cloud Team'" >> manifest.yaml
 
+      - name: Display manifest information
+        run: cat manifest.yaml
+        shell: bash
+
+      - name: Display build file
+        run: cat build.yaml
+        shell: bash
+
       - name: Generate collection modules
         run: >-
           ansible-playbook build.yaml -e manifest_file=manifest.yaml -v
