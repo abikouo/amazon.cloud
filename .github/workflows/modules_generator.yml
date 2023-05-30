@@ -56,15 +56,6 @@ jobs:
           --disable-pip-version-check
         shell: bash
 
-      - name: Generate playbook to execute
-        run: |
-          echo "---" > build.yaml
-          echo "- hosts: localhost"  >> build.yaml
-          echo "  gather_facts: yes" >> build.yaml
-          echo "  roles:"            >> build.yaml
-          echo "  - ansible.content_builder.run" >> build.yaml
-        shell: bash
-
       - name: Read current version from galaxy.yml
         id: read-version
         run: echo "current_version=$(yq -r .version galaxy.yml)" >> $GITHUB_OUTPUT
@@ -77,35 +68,10 @@ jobs:
           python -c "from packaging import version; v=version.Version('${{ steps.read-version.outputs.current_version }}'); print('next_version=%s.%s.%s' % (v.major, v.minor+1, v.micro))" >> $GITHUB_OUTPUT
         shell: bash
 
-      - name: Generate manifest file
-        run: |
-          echo "---" > manifest.yaml
-          echo "collection:" >> manifest.yaml
-          echo "  path: ${{ env.collection_path }}" >> manifest.yaml
-          echo "  namespace: amazon" >> manifest.yaml
-          echo "  name: cloud"       >> manifest.yaml
-          echo "plugins:" >> manifest.yaml
-          echo "- type: module_openapi" >> manifest.yaml
-          echo "  name: amazon_cloud"   >> manifest.yaml
-          echo "  content: cloud"       >> manifest.yaml
-          echo "  api_object_path: api_specifications" >> manifest.yaml
-          echo "  resource: ${{ env.collection_path }}/config" >> manifest.yaml
-          echo "  action: generate_all" >> manifest.yaml
-          echo "  unique_key: ''"       >> manifest.yaml
-          echo "  rm_swagger_json: ''"  >> manifest.yaml
-          echo "  module_version: ${{ steps.compute-version.outputs.next_version }}"     >> manifest.yaml
-          echo "  author: 'Ansible Cloud Team'" >> manifest.yaml
-        shell: bash
-
-      - name: Display manifest information
-        run: cat manifest.yaml
-        shell: bash
-
-      - name: Display build file
-        run: cat build.yaml
-        shell: bash
-
       - name: Generate collection modules
         run: >-
-          ansible-playbook build.yaml -e manifest_file=manifest.yaml -v
+          ansible-playbook config/generator_files/build.yaml 
+          -e collection_path="${{ github.workspace }}/${{ env.collection_path }}"
+          -e collection_version="${{ steps.compute-version.outputs.next_version }}" -v
         shell: bash
+        working-directory: ${{ env.collection_path }}
