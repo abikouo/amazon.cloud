@@ -23,7 +23,7 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v3
         with:
-          repository: ${{ env.branch_name }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ env.branch_name }}
           path: ${{ env.collection_path }}
 
@@ -75,7 +75,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         working-directory: ${{ env.collection_path }}
 
-      - name: check if some plugins were generates
+      - name: push changes
         run: |
           if [[ $(git ls-files plugins --exclude-standard --others | wc -l) -gt 0 ]]; then
             git config user.name "Ansible Bot"
