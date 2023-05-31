@@ -20,11 +20,6 @@ jobs:
       ansible_version: 'stable-2.11'
       collection_path: "amazon_cloud"
       ansible_path: "ansible"
-      python_modules: |
-        packaging
-        yq
-        q
-        ruamel_yaml
     steps:
       - name: checkout repository
         uses: actions/checkout@v3
@@ -40,7 +35,11 @@ jobs:
 
       - name: Install ansible with python dependencies
         run: >-
-          python3 -m pip install ${{ env.python_modules }}
+          python3 -m pip install
+          packaging
+          yq
+          q
+          ruamel_yaml
           https://github.com/ansible/ansible/archive/${{ env.ansible_version }}.tar.gz
           --disable-pip-version-check
         shell: bash
