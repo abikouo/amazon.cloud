@@ -78,7 +78,6 @@ jobs:
         working-directory: ${{ env.collection_path }}
 
       - name: check if some plugins were generates
-        id: check-plugins
         run:
           if [[ $(git ls-files plugins --exclude-standard --others | wc -l) -gt 0 ]]; then
             git config user.name "Ansible Bot"
