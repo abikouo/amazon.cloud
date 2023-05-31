@@ -42,7 +42,7 @@ jobs:
         run: >-
           python3 -m pip install
           packaging
-          q
+          tox
           yq
           https://github.com/ansible/ansible/archive/${{ env.ansible_version }}.tar.gz
           -r /home/runner/.ansible/collections/ansible_collections/ansible/content_builder/requirements.txt
@@ -71,4 +71,9 @@ jobs:
           AWS_DEFAULT_REGION: "us-east-1"
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        working-directory: ${{ env.collection_path }}
+
+      - name: Run tox linters
+        run: tox -e linters -vv
+        shell: bash
         working-directory: ${{ env.collection_path }}
