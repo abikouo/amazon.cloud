@@ -55,6 +55,7 @@ jobs:
 
       - name: Install required ansible collections
         run: |
+          python3 -m pip install -r ${{ github.workspace }}/${{ env.ansible_path }}/requirements.txt
           source ${{ github.workspace }}/${{ env.ansible_path }}/hacking/env-setup
           ansible-galaxy collection install git+https://github.com/ansible-community/ansible.content_builder.git
           ansible-galaxy collection install ansible.utils
