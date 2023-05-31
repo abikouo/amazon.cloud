@@ -18,13 +18,13 @@ jobs:
       ansible_version: 'stable-2.11'
       collection_path: "amazon_cloud"
       ansible_path: "ansible"
-      branch_name: ${{ github.event.pull_request.head.repo.full_name }}
+      branch_name: ${{ github.head_ref }}
     steps:
       - name: checkout repository
         uses: actions/checkout@v3
         with:
           repository: ${{ env.branch_name }}
-          ref: ${{ github.head_ref }}
+          ref: ${{ env.branch_name }}
           path: ${{ env.collection_path }}
 
       - name: Set up Python ${{ env.python_version }}
