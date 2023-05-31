@@ -20,6 +20,11 @@ jobs:
       ansible_version: 'stable-2.11'
       collection_path: "amazon_cloud"
       ansible_path: "ansible"
+      python_modules: |
+        packaging
+        yq
+        q
+        ruamel_yaml
     steps:
       - name: checkout repository
         uses: actions/checkout@v3
@@ -28,17 +33,17 @@ jobs:
           ref: ${{ github.head_ref }}
           path: ${{ env.collection_path }}
 
-      - name: checkout ansible
-        uses: actions/checkout@v3
-        with:
-          repository: ansible/ansible
-          ref: stable-2.11
-          path: ${{ env.ansible_path }}
-
       - name: Set up Python ${{ env.python_version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.python_version }}
+
+      - name: Install ansible with python dependencies
+        run: >-
+          python3 -m pip install ${{ env.python_modules }}
+          https://github.com/ansible/ansible/archive/${{ env.ansible_version }}.tar.gz
+          --disable-pip-version-check
+        shell: bash
 
       - name: Read current version from galaxy.yml
         id: read-version
@@ -53,14 +58,18 @@ jobs:
           python3 -c "from packaging import version; v=version.Version('${{ steps.read-version.outputs.current_version }}'); print('next_version=%s.%s.%s' % (v.major, v.minor+1, v.micro))" >> $GITHUB_OUTPUT
         shell: bash
 
-      - name: Install required ansible collections
+      - name: Install required ansible collections with python requirements
         run: |
-          python3 -m pip install -r ${{ github.workspace }}/${{ env.ansible_path }}/requirements.txt
-          source ${{ github.workspace }}/${{ env.ansible_path }}/hacking/env-setup
           ansible-galaxy collection install git+https://github.com/ansible-community/ansible.content_builder.git
           ansible-galaxy collection install ansible.utils
-          python3 -m pip install ruamel_yaml q -r /home/runner/.ansible/collections/ansible_collections/ansible/content_builder/requirements.txt
-          ansible-playbook config/generator_files/build.yaml -e collection_path="${{ github.workspace }}/${{ env.collection_path }}" -e collection_version="${{ steps.compute-version.outputs.next_version }}" -v
+          python3 -m pip install -r /home/runner/.ansible/collections/ansible_collections/ansible/content_builder/requirements.txt
+        shell: bash
+
+      - name: Generate collection modules
+        run: >-
+          ansible-playbook config/generator_files/build.yaml 
+          -e collection_path="${{ github.workspace }}/${{ env.collection_path }}" 
+          -e collection_version="${{ steps.compute-version.outputs.next_version }}" -vvv
         shell: bash
         env:
           AWS_DEFAULT_REGION: "us-east-1"
