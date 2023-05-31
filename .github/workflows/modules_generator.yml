@@ -44,6 +44,7 @@ jobs:
           packaging
           tox
           q
+          ruamel_yaml
           yq
           https://github.com/ansible/ansible/archive/${{ env.ansible_version }}.tar.gz
           -r /home/runner/.ansible/collections/ansible_collections/ansible/content_builder/requirements.txt
