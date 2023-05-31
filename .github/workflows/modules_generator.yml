@@ -6,15 +6,13 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  # push:
-  #   branches:
-  #     - main
-  #     - 'stable-*'
   pull_request_target:
 
 jobs:
   generate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       python_version: '3.9'
       ansible_version: 'stable-2.11'
