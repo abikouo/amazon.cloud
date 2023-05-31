@@ -43,6 +43,7 @@ jobs:
           python3 -m pip install
           packaging
           tox
+          q
           yq
           https://github.com/ansible/ansible/archive/${{ env.ansible_version }}.tar.gz
           -r /home/runner/.ansible/collections/ansible_collections/ansible/content_builder/requirements.txt
