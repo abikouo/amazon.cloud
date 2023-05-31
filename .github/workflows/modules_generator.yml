@@ -59,7 +59,7 @@ jobs:
           source ${{ github.workspace }}/${{ env.ansible_path }}/hacking/env-setup
           ansible-galaxy collection install git+https://github.com/ansible-community/ansible.content_builder.git
           ansible-galaxy collection install ansible.utils
-          python3 -m pip install q -r /home/runner/.ansible/collections/ansible_collections/ansible/content_builder/requirements.txt
+          python3 -m pip install ruamel_yaml q -r /home/runner/.ansible/collections/ansible_collections/ansible/content_builder/requirements.txt
           ansible-playbook config/generator_files/build.yaml -e collection_path="${{ github.workspace }}/${{ env.collection_path }}" -e collection_version="${{ steps.compute-version.outputs.next_version }}" -v
         shell: bash
         env:
